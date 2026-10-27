@@ -1,0 +1,12 @@
+# Personal data must never be committed
+job-tracker-export-*.json
+*-backup*.json
+backups/
+data/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
