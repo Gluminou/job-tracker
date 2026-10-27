@@ -5,6 +5,7 @@ A small, private tracker for job applications. It runs entirely in the browser: 
 ## Features
 
 - **Pipeline board**: Lead, Applied, Screening, Interviewing, Offer, Closed. Drag cards between stages on desktop, or use **Move stage** on any device.
+- **Fit assessment**: profile fit score, shortlist odds and a short strengths and gaps summary per application, shown on the card.
 - **Application page**: details, stage progress, a dated timeline, the next action with a due date, linked contacts, documents and tailoring notes (what you changed in your resume and cover letter for this job).
 - **Due list**: overdue, this week and later actions in one place, with one-tap completion.
 - **Global contacts**: one record per person (recruiters, hiring managers, introducers, network), linked to as many applications as needed, with preferred language.

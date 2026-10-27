@@ -25,7 +25,10 @@ JOBTRACKER v1
 | `source` | string | e.g. `Direct`, `LinkedIn`, `Referral: Name`, `Recruiter: Name` |
 | `jdUrl` | string | `http(s)` link to the job post. |
 | `priority` | `High`, `Medium`, `Low` | Defaults to Medium. |
-| `salary` | string | Salary band, free text. |
+| `salary` | string | Salary band, free text, e.g. `HKD 90k to 120k per month (market estimate)`. |
+| `fitScore` | number 0 to 100 | Profile fit against the job description. `"78%"` is also accepted. |
+| `shortlist` | `High`, `Medium`, `Low` | Likelihood of being shortlisted. |
+| `fitSummary` | string | One or two lines: main strengths and main gaps. |
 | `notes` | string | Scope of the role, reporting line, team size. |
 | `stage` | `Lead`, `Applied`, `Screening`, `Interviewing`, `Offer`, `Closed` | New records start in Lead unless set. |
 | `closedReason` | `Won`, `Rejected`, `Withdrew`, `Ghosted` | Required when `stage` is `Closed`. |
@@ -63,6 +66,20 @@ JOBTRACKER v1
   "contacts": [{ "name": "Jane Doe", "title": "Talent Partner", "type": "Recruiter", "lang": "EN" }],
   "log": { "date": "2026-10-27", "type": "Note", "text": "Job description reviewed" },
   "next": { "text": "Tailor resume and cover letter", "due": "2026-10-29" }
+}
+```
+
+**Fit and salary assessment**
+
+```
+JOBTRACKER v1
+{
+  "id": "example-studio-head-of-production",
+  "action": "update",
+  "fitScore": 78,
+  "shortlist": "Medium",
+  "fitSummary": "Strong match on production leadership and LiveOps. Gaps: no console AAA shipped title, Cantonese preferred.",
+  "salary": "HKD 90k to 120k per month (market estimate)"
 }
 ```
 

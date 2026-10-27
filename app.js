@@ -32,8 +32,23 @@
   const DOC_KINDS = ['Resume', 'Cover letter', 'Interview prep', 'Job description', 'Other'];
   const FIELDS = [
     ['company', 'Company'], ['role', 'Role'], ['location', 'Location'], ['source', 'Source'],
-    ['jdUrl', 'Job post'], ['priority', 'Priority'], ['salary', 'Salary band'], ['notes', 'Scope and notes']
+    ['jdUrl', 'Job post'], ['priority', 'Priority'], ['salary', 'Salary band'], ['notes', 'Scope and notes'],
+    ['fitScore', 'Profile fit'], ['shortlist', 'Shortlist odds'], ['fitSummary', 'Fit summary']
   ];
+  const ODDS = ['High', 'Medium', 'Low'];
+  // Normalises one field value from a record or form; '' means "no value".
+  function fieldVal(key, v) {
+    if (key === 'jdUrl') return safeUrl(v);
+    if (key === 'priority') return pickCase(v, PRIORITIES);
+    if (key === 'shortlist') return pickCase(v, ODDS);
+    if (key === 'fitScore') {
+      const s = str(v).replace('%', '');
+      if (s === '') return '';
+      const n = Math.round(Number(s));
+      return isFinite(n) && n >= 0 && n <= 100 ? String(n) : '';
+    }
+    return str(v);
+  }
 
   // ---------- Small helpers ----------
   const $ = (sel, root) => (root || document).querySelector(sel);
@@ -133,6 +148,9 @@
       source: str(a.source),
       jdUrl: safeUrl(a.jdUrl),
       priority: pickCase(a.priority, PRIORITIES) || 'Medium',
+      fitScore: fieldVal('fitScore', a.fitScore),
+      shortlist: fieldVal('shortlist', a.shortlist),
+      fitSummary: str(a.fitSummary),
       salary: str(a.salary),
       notes: str(a.notes),
       stage: stageId(a.stage) || 'lead',
@@ -268,11 +286,12 @@
     const lines = [];
     FIELDS.forEach(([key, label]) => {
       if (r[key] === undefined) return;
-      let v = key === 'jdUrl' ? safeUrl(r[key]) : key === 'priority' ? pickCase(r[key], PRIORITIES) : str(r[key]);
+      const v = fieldVal(key, r[key]);
       if (!v) return;
       const old = a ? a[key] : '';
       if (v === old) return;
-      lines.push(isNew || !old ? label + ': ' + v : label + ': ' + old + ' → ' + v);
+      const pct = key === 'fitScore' ? '%' : '';
+      lines.push(isNew || !old ? label + ': ' + v + pct : label + ': ' + old + pct + ' → ' + v + pct);
     });
     const st = r.stage !== undefined ? stageId(r.stage) : '';
     if (r.stage !== undefined && !st) throw new Error('Unknown stage "' + str(r.stage) + '".');
@@ -314,7 +333,7 @@
     }
     FIELDS.forEach(([key]) => {
       if (r[key] === undefined) return;
-      const v = key === 'jdUrl' ? safeUrl(r[key]) : key === 'priority' ? pickCase(r[key], PRIORITIES) : str(r[key]);
+      const v = fieldVal(key, r[key]);
       if (v) a[key] = v;
     });
     arr(r.contacts).forEach((c) => {
@@ -404,7 +423,8 @@
   function cardHTML(a) {
     const closed = a.stage === 'closed';
     const late = !closed && a.next && a.next.due && daysFrom(a.next.due) < 0;
-    const meta = [a.location, a.source].filter(Boolean).map((m) => '<span>' + esc(m) + '</span>').join('');
+    const meta = [a.location, a.source, a.fitScore ? 'Fit ' + a.fitScore + '%' : '', a.shortlist ? 'Shortlist: ' + a.shortlist : '']
+      .filter(Boolean).map((m) => '<span>' + esc(m) + '</span>').join('');
     return '<a class="card" href="#/app/' + encodeURIComponent(a.id) + '" draggable="true" data-id="' + esc(a.id) + '">' +
       '<div class="card-top"><div class="card-title"><span class="card-company">' + esc(a.company || 'Untitled') + '</span>' +
       (a.role ? '<span class="card-role">' + esc(a.role) + '</span>' : '') + '</div>' +
@@ -507,6 +527,8 @@
   function detailsHTML(a) {
     const rows = [
       ['Location', esc(a.location)], ['Source', esc(a.source)], ['Priority', esc(a.priority)],
+      ['Profile fit', a.fitScore ? esc(a.fitScore) + '%' : ''], ['Shortlist odds', esc(a.shortlist)],
+      ['Fit summary', esc(a.fitSummary)],
       ['Salary band', esc(a.salary)], ['Scope', esc(a.notes)],
       ['Job post', a.jdUrl ? '<a href="' + esc(a.jdUrl) + '" target="_blank" rel="noopener noreferrer">Open job post</a>' : '']
     ];
@@ -665,7 +687,10 @@
       '<div class="grid-2"><label class="field">Priority<select name="priority">' + opt(PRIORITIES, a.priority) + '</select></label>' +
       (isNew ? '<label class="field">Stage<select name="stage">' + STAGES.filter((s) => s.id !== 'closed').map((s) => '<option value="' + s.id + '">' + s.name + '</option>').join('') + '</select></label>' : fld('Salary band', 'salary', a.salary)) + '</div>' +
       (isNew ? fld('Salary band', 'salary', a.salary) : '') +
-      '<label class="field">Scope and notes<textarea name="notes">' + esc(a.notes) + '</textarea></label>';
+      '<label class="field">Scope and notes<textarea name="notes">' + esc(a.notes) + '</textarea></label>' +
+      '<div class="grid-2">' + fld('Profile fit (%)', 'fitScore', a.fitScore, 'type="number" min="0" max="100" step="1"') +
+      '<label class="field">Shortlist odds<select name="shortlist"><option value="">Not assessed</option>' + opt(ODDS, a.shortlist) + '</select></label></div>' +
+      '<label class="field">Fit summary<textarea name="fitSummary">' + esc(a.fitSummary) + '</textarea></label>';
     const foot = (isNew ? '' : '<button type="submit" class="btn btn-danger" value="delete" formnovalidate>Delete</button><span class="spacer"></span>') +
       '<button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn btn-primary" value="save">' + (isNew ? 'Add application' : 'Save') + '</button>';
     openDialog(shell(isNew ? 'New application' : 'Edit application', isNew ? '' : appLabel(a), body, foot), (fd, action) => {
@@ -678,7 +703,9 @@
         render();
         return;
       }
-      ['company', 'role', 'location', 'source', 'salary', 'notes'].forEach((k) => { a[k] = str(fd.get(k)); });
+      ['company', 'role', 'location', 'source', 'salary', 'notes', 'fitSummary'].forEach((k) => { a[k] = str(fd.get(k)); });
+      a.fitScore = fieldVal('fitScore', fd.get('fitScore'));
+      a.shortlist = fieldVal('shortlist', fd.get('shortlist'));
       a.jdUrl = safeUrl(fd.get('jdUrl'));
       a.priority = pickCase(fd.get('priority'), PRIORITIES) || 'Medium';
       if (isNew) {
