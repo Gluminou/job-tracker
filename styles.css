@@ -365,6 +365,7 @@ legend { font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 
 /* ---------- Small screens ---------- */
 @media (max-width: 760px) {
   body { padding-bottom: 76px; }
+  :root { --au-bar-bottom: 72px; } /* update bar sits above the tab bar */
   .topbar { padding: 8px 16px; }
   .topbar .nav { display: none; }
   .hide-sm { display: none; }
