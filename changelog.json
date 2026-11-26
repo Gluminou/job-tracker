@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.1.0",
+    "date": "2026-11-26",
+    "notes": [
+      "Sync between devices: once a GitHub key is entered, your applications and contacts follow you between your phone and your computer."
+    ]
+  },
+  {
     "version": "1.0.0",
     "date": "2026-11-21",
     "notes": [

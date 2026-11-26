@@ -1,6 +1,7 @@
 /*
  * Job Tracker
- * Local-first job application tracker. All data stays in this browser (localStorage).
+ * Local-first job application tracker. Data lives in this browser (localStorage), and
+ * sync.js copies it between devices through a private GitHub repo once a key is entered.
  * No build step, no dependencies.
  */
 (function () {
